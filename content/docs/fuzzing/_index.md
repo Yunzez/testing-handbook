@@ -41,9 +41,22 @@ Many modern fuzzers use a **mutation-based, coverage-guided** strategy:
 
 You can think of it as a feedback loop: inputs that lead to new or surprising behavior are kept and used to generate more inputs.
 
-## Introduction to fuzzers
+## Typical fuzzing setup
 
 Every fuzzing setup consists of an instrumented System Under Test (SUT), the fuzzing harness, and the fuzzer runtime. A runtime for the instrumentation may also be required. For example, the optional AddressSanitizer (ASan) instrumentation adds a runtime that is used to detect memory corruption bugs like [heap-buffer overflows](https://en.wikipedia.org/wiki/Heap_overflow) more reliably. The following figure shows the standard fuzzing setup.
+
+A fuzzing run usually connects three main pieces:
+
+```text
+   +-----------------+       +-----------------+       +-----------------+
+   |  Fuzzer runtime | ----> |    Harness      | ----> |   SUT / target  |
+   | (libFuzzer, etc)|       | (wrapper fn)    |       |  (your library) |
+   +-----------------+       +-----------------+       +-----------------+
+            ^                        |                          |
+            |                        |                          |
+            +------------------------+--------------------------+
+                         crashes, coverage, logs
+```
 
 ![alt text](./intro.svg "Title")
 The general fuzzing scenario consists of the developer writing a harness for a SUT. After starting a fuzzing campaign, the fuzzer runtime generates random test cases that are sent to the harness. The harness then executes the SUT, which could lead to the discovery of bugs and crashes. Instrumentation runtime and the instrumentation added to the SUT are generally optional, even though most fuzzers instrument the SUT code and add a runtime.
