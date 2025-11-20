@@ -108,7 +108,4 @@ fn harness(data: &[u8]) {
 
 There is no standard in the Rust ecosystem for the function signature of a harness. To remain generic, let's pretend a Rust fuzzing harness is a void function that receives a byte array with random data of Rust type `&[u8]`.
 
-
-Many techniques can be leveraged when writing harnesses; we discuss these in the [Writing harnesses]({{% relref "docs/fuzzing/techniques/01-writing-harnesses" %}}) section. You also need to be aware of certain [rules]({{% relref "docs/fuzzing/techniques/01-writing-harnesses#practical-harness-rules" %}}) that forbid certain code from being executed in a harness.
-
 **Fuzzer runtime:** The fuzzing loop is implemented here. This unit also provides the main function for the fuzzer. The fuzzing runtime parses fuzzing options, executes the harness, collects feedback, and manages the fuzzer state. The runtime is provided by the fuzzing project you use, such as libFuzzer or AFL++. Any runtime that is required for collecting feedback through instrumentations is implemented in the fuzzer runtime.
