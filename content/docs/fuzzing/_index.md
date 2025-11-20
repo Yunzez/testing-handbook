@@ -43,25 +43,20 @@ You can think of it as a feedback loop: inputs that lead to new or surprising be
 
 ## Typical fuzzing setup
 
-Every fuzzing setup consists of an instrumented System Under Test (SUT), the fuzzing harness, and the fuzzer runtime. A runtime for the instrumentation may also be required. For example, the optional AddressSanitizer (ASan) instrumentation adds a runtime that is used to detect memory corruption bugs like [heap-buffer overflows](https://en.wikipedia.org/wiki/Heap_overflow) more reliably. The following figure shows the standard fuzzing setup.
-
 A fuzzing run usually connects three main pieces:
 
-```text
-   +-----------------+       +-----------------+       +-----------------+
-   |  Fuzzer runtime | ----> |    Harness      | ----> |   SUT / target  |
-   | (libFuzzer, etc)|       | (wrapper fn)    |       |  (your library) |
-   +-----------------+       +-----------------+       +-----------------+
-            ^                        |                          |
-            |                        |                          |
-            +------------------------+--------------------------+
-                         crashes, coverage, logs
-```
+![alt text](./setup_workflow.svg "Title")
 
-![alt text](./intro.svg "Title")
-The general fuzzing scenario consists of the developer writing a harness for a SUT. After starting a fuzzing campaign, the fuzzer runtime generates random test cases that are sent to the harness. The harness then executes the SUT, which could lead to the discovery of bugs and crashes. Instrumentation runtime and the instrumentation added to the SUT are generally optional, even though most fuzzers instrument the SUT code and add a runtime.
+- The **fuzzer runtime**: owns the main loop, generates/mutates inputs, tracks coverage and crashes.  
+- The **harness**: is the entry point the fuzzer calls; it takes the raw input and calls your code.  
+- The **SUT**: is the actual functionality you are testing (e.g., parsing, arithmetic, expression evaluation).
 
+In this study, the IDE extension helps by:
 
+- Suggesting potential fuzz targets inside the SUT.  
+- Generating a harness file for a chosen target.  
+- Letting you jump directly to the harness and run fuzzing from within the editor.  
+- Showing fuzzer output (including crashes and coverage) in the IDE.
 
 **SUT (System Under Test):** This is the code you want to test. To create a fuzzing build of your SUT, you need to control how the application's code is compiled and linked. The following figure shows a very simple SUT that serves as a running example throughout this chapter of the Testing Handbook.
 
