@@ -83,12 +83,16 @@ fn main() {
 ```
 
 
-**Harness:** The harness is the entrypoint for your fuzz test. The fuzzer calls this function with random —or carefully mutated—data.
+**Simple rust `cargo fuzz` style harness:**
 
-```Rust
-fn harness(data: &[u8]) {
+```rust
+#![no_main]
+use libfuzzer_sys::fuzz_target;
+
+// Defines the fuzzing harness that cargo-fuzz/libFuzzer will call
+fuzz_target!(|data: &[u8]| {
     check_buf(data);
-}
+});
 ```
 
 The fuzzer’s job is to automatically discover an input like `b"abc"` that makes `check_buf` abort, without a human having to think of that specific combination.
