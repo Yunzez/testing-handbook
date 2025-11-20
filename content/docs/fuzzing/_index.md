@@ -70,9 +70,10 @@ After the fuzzing campaign finishes, the found bugs are returned.
 
 Every fuzzing setup consists of an instrumented System Under Test (SUT), the fuzzing harness, and the fuzzer runtime. A runtime for the instrumentation may also be required. For example, the optional AddressSanitizer (ASan) instrumentation adds a runtime that is used to detect memory corruption bugs like [heap-buffer overflows](https://en.wikipedia.org/wiki/Heap_overflow) more reliably. The following figure shows the standard fuzzing setup.
 
-{{< resourceFigure "intro.svg" >}}
+![alt text](./intro.svg "Title")
 The general fuzzing scenario consists of the developer writing a harness for a SUT. After starting a fuzzing campaign, the fuzzer runtime generates random test cases that are sent to the harness. The harness then executes the SUT, which could lead to the discovery of bugs and crashes. Instrumentation runtime and the instrumentation added to the SUT are generally optional, even though most fuzzers instrument the SUT code and add a runtime.
-{{< /resourceFigure >}}
+
+
 
 **SUT (System Under Test):** This is the code you want to test. To create a fuzzing build of your SUT, you need to control how the application's code is compiled and linked. The following figure shows a very simple SUT that serves as a running example throughout this chapter of the Testing Handbook.
 
