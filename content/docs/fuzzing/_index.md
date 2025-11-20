@@ -3,7 +3,6 @@
 Fuzzing is an automated testing technique where a program (the *fuzzer*) runs a piece of code many times with different inputs, trying to trigger crashes or unexpected behavior that might reveal bugs or security vulnerabilities.
 
 Instead of a developer manually writing many test cases, a fuzzer:
-
 - Automatically generates or mutates inputs.
 - Runs the code under test with those inputs.
 - Watches for crashes and keeps track of which inputs explore new behavior.
@@ -60,7 +59,7 @@ In this study, the IDE extension helps by:
 
 **SUT (System Under Test):** This is the code you want to test. To create a fuzzing build of your SUT, you need to control how the application's code is compiled and linked. The following figure shows a very simple SUT that serves as a running example throughout this chapter of the Testing Handbook.
 
-## 5. A tiny example
+## A tiny example
 Here is a small example of code with a bug and a matching harness, adapted from common fuzzing tutorials.
 
 **Example code with a bug that causes an abort. The `check_buf` function aborts for the input "abc"**.
