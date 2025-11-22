@@ -10,14 +10,13 @@ Instead of a developer manually writing many test cases, a fuzzer:
 ## Terminology
 
 * **SUT/target:** The System Under Test (SUT) is the piece of software that is being tested. 
-* **Fuzzer:**  Fuzz testing, also known as fuzzing, is an automated software testing method that supplies a SUT with invalid, unexpected, or random data as inputs. The program that implements the fuzzing algorithm is called a fuzzer.
+* **Fuzzer:**  Fuzz testing, or fuzzing, is an automated software testing method that supplies a SUT with invalid, unexpected, or random data as inputs. The program that implements the fuzzing algorithm is called a fuzzer.
 * **Test case:** A test case is the concrete input that is given to the testing harness.
 * **harness:**  A small wrapper function that:
   - Accepts input from the fuzzer.
   - Converts it into the right argument types.
   - Calls the target function (or functions) you want to fuzz.
   - In this study, the IDE extension **auto-generates** harnesses for you. You can open and edit them like normal Rust code.
-* **Fuzz test:** A fuzz test consists of a fuzzing harness and the SUT. You might refer to a compiled binary that includes the harness and SUT as a fuzz test.
 * **Fuzzing campaign:** One run of the fuzzer. When you click the fuzzing run button in the Extension, you start a campaign: the fuzzer generates inputs, runs the harness+SUT, and records results.
 * **Code coverage:** A metric to measure the degree to which the source code of a program is executed.
 
@@ -34,9 +33,8 @@ Many modern fuzzers use a **mutation-based, coverage-guided** strategy:
 
 1. Start with one or more initial inputs (a *corpus*).  
 2. Run the harness+SUT on these inputs and measure code coverage.  
-3. Take inputs that explore new code paths and mutate them.  
+3. Take inputs that explore new code paths and mutate them, (e.g. flipping bits, inserting new bytes in the byte arrays or truncating it)
 4. Run the new inputs, keep the ones that seem interesting (e.g., increase coverage or cause crashes).  
-5. Repeat this loop during the fuzzing campaign.
 
 You can think of it as a feedback loop: inputs that lead to new or surprising behavior are kept and used to generate more inputs.
 
@@ -56,8 +54,6 @@ In this study, the IDE extension helps by:
 - Generating a harness file for a chosen target.  
 - Letting you jump directly to the harness and run fuzzing from within the editor.  
 - Showing fuzzer output (including crashes and coverage) in the IDE.
-
-**SUT (System Under Test):** This is the code you want to test. To create a fuzzing build of your SUT, you need to control how the application's code is compiled and linked. The following figure shows a very simple SUT that serves as a running example throughout this chapter of the Testing Handbook.
 
 ## A tiny example
 Here is a small example of code with a bug and a matching harness, adapted from common fuzzing tutorials.
