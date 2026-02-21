@@ -116,6 +116,7 @@ Below are Rust-specific patterns that help harnesses compile and produce useful 
 If the target function takes multiple parameters, you can request multiple values directly from the fuzzer. 
 
 **Using Tuples**
+
 The arbitrary crate provides built-in support for tuples. This is the quickest way to pass multiple values:
 ```rust
 use libfuzzer_sys::fuzz_target;
@@ -128,6 +129,7 @@ fuzz_target!(|data: (String, Vec<u32>, bool)| {
 ```
 
 **Using Structs**
+
 For complex inputs, defining a struct with #[derive(Arbitrary)] is clearer and easier to maintain.
 ```rust
 use libfuzzer_sys::fuzz_target;
