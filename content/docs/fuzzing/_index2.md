@@ -115,23 +115,36 @@ Below are Rust-specific patterns that help harnesses compile and produce useful 
 `fuzz_target!` does not have to take `&[u8]`. You can request many standard Rust types directly, and `cargo-fuzz`/`libfuzzer_sys` will generate them for you.
 If the target function takes multiple parameters, you can request multiple values directly from the fuzzer. 
 
-Common examples:
-
+**Using Tuples**
+The arbitrary crate provides built-in support for tuples. This is the quickest way to pass multiple values:
 ```rust
-fuzz_target!(|s: String, v: Vec<u8>| {
-    your_project::process(s, v);
+use libfuzzer_sys::fuzz_target;
+
+// The fuzzer generates a single tuple containing all three types
+fuzz_target!(|data: (String, Vec<u32>, bool)| {
+    let (name, payload, flag) = data;
+    your_project::process(&name, payload, flag);
 });
 ```
 
+**Using Structs**
+For complex inputs, defining a struct with #[derive(Arbitrary)] is clearer and easier to maintain.
 ```rust
-fuzz_target!(|(name: &str, payload: Vec<u32>, flag: bool)| {
-    your_project::process(name, payload, flag);
+use libfuzzer_sys::fuzz_target;
+use arbitrary::Arbitrary;
+
+#[derive(Arbitrary, Debug)]
+struct MyInputs {
+    name: String,
+    payload: Vec<u8>,
+}
+
+fuzz_target!(|input: MyInputs| {
+    your_project::process(input.name, input.payload);
 });
 ```
 
-Use this when the target already accepts these types (or close variants). It avoids manual parsing and usually generates “more valid” values than treating everything as raw bytes.
-
-## Structure-aware fuzzing with the `arbitrary` crate
+## More on `arbitrary` crate: Structure-aware fuzzing
 
 The `arbitrary` crate simplifies writing fuzzing harnesses by allowing the fuzzer to generate structured Rust values directly from input bytes. By deriving `Arbitrary`, custom structs and enums can be used as fuzzing inputs.
 
@@ -189,21 +202,6 @@ fuzz_target!(|data: your_project::Name| {
 **If the type does not support `Arbitrary`:**
 
 If the type does not implement `Arbitrary` and you cannot add it, you must change the harness to request simpler types (e.g., `String`, `Vec<u8>`, primitives) and manually convert them into the required type.
-
-For example: 
-```rust
-#![no_main]
-
-use libfuzzer_sys::fuzz_target;
-
-fuzz_target!(|(name: String, id: u32)| {
-    let user = your_project::User {
-        name,
-        id,
-    };
-    your_project::process(user);
-});
-```
 
 **Alternative: using raw bytes with `Unstructured`**
 
