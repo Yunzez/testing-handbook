@@ -138,8 +138,6 @@ The `arbitrary` crate simplifies writing fuzzing harnesses by allowing the fuzze
 **Prerequisite:**
 This works only if the target type **and all of its fields (including nested types)** implement or can derive `Arbitrary`. If any field does not support `Arbitrary`, deriving will fail.
 
----
-
 ### Example: deriving `Arbitrary` in the project
 
 ```rust
@@ -192,3 +190,45 @@ fuzz_target!(|data: your_project::Name| {
 
 If the type does not implement `Arbitrary` and you cannot add it, you must change the harness to request simpler types (e.g., `String`, `Vec<u8>`, primitives) and manually convert them into the required type.
 
+For example: 
+```rust
+#![no_main]
+
+use libfuzzer_sys::fuzz_target;
+
+fuzz_target!(|(name: String, id: u32)| {
+    let user = your_project::User {
+        name,
+        id,
+    };
+    your_project::process(user);
+});
+```
+
+**Alternative: using raw bytes with `Unstructured`**
+
+If you need more control over how values are extracted from the input, you can use `arbitrary::Unstructured`:
+
+```rust
+#![no_main]
+
+use libfuzzer_sys::fuzz_target;
+use arbitrary::{Arbitrary, Unstructured};
+
+fuzz_target!(|data: &[u8]| {
+    let mut u = Unstructured::new(data);
+
+    if let (Ok(name), Ok(id)) = (
+        u.arbitrary::<String>(),
+        u.arbitrary::<u32>(),
+    ) {
+        let user = your_project::User {
+            name,
+            id,
+        };
+        your_project::process(user);
+    }
+});
+```
+
+`Unstructured` treats the byte input as a stream and lets you pull multiple values from it manually. Use this only when the typed `fuzz_target!` form is not sufficient.
