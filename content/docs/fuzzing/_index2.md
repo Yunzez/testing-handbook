@@ -101,23 +101,14 @@ In your tasks, you will not be writing these harnesses from scratch—the IDE ex
 - Interpreting the output (crashes, coverage, other fields) to decide what to do next.  
 
 
-## Fixing harnesses
+## Writing/Fixing harnesses
 
-In this study, the IDE extension auto-generates harnesses. Sometimes the harness does not compile or does not correctly construct inputs. You may need to fix it.
-
-A common issue is that the target function expects a **structured input** (e.g., a `String`, struct, or enum), but the harness only receives raw bytes (`&[u8]`). In this case, the harness must convert the fuzz input into the required type.
-
-
-Below are Rust-specific patterns that help harnesses compile and produce useful inputs.
+In this study, the IDE extension auto-generates harnesses. Sometimes the harness does not compile or does not correctly construct inputs. You may need to fix it. Here, we provide more techniques on Harness construction. 
 
 ### Requesting inputs
 
-`fuzz_target!` does not have to take `&[u8]`. You can request many standard Rust types directly, and `cargo-fuzz`/`libfuzzer_sys` will generate them for you.
-If the target function takes multiple parameters, you can request multiple values directly from the fuzzer. 
+`fuzz_target!` takes all kinds of simple types. You can request many standard Rust types directly. You can request multiple values directly from the fuzzer in format of a tuple:
 
-**Using Tuples**
-
-The arbitrary crate provides built-in support for tuples. This is the quickest way to pass multiple values:
 ```rust
 use libfuzzer_sys::fuzz_target;
 
@@ -130,7 +121,7 @@ fuzz_target!(|data: (String, Vec<u32>, bool)| {
 
 **Using Structs**
 
-For complex inputs, defining a struct with #[derive(Arbitrary)] is clearer and easier to maintain.
+For input that has complex types, defining a struct with #[derive(Arbitrary)] is clearer and easier to maintain.
 ```rust
 use libfuzzer_sys::fuzz_target;
 use arbitrary::Arbitrary;
@@ -150,24 +141,22 @@ fuzz_target!(|input: MyInputs| {
 
 The `arbitrary` crate simplifies writing fuzzing harnesses by allowing the fuzzer to generate structured Rust values directly from input bytes. By deriving `Arbitrary`, custom structs and enums can be used as fuzzing inputs.
 
-**Prerequisite:**
-This works only if the target type **and all of its fields (including nested types)** implement or can derive `Arbitrary`. If any field does not support `Arbitrary`, deriving will fail.
 
-### Example: deriving `Arbitrary` in the project
+### Example: deriving `Arbitrary` in your **project code**:
 
 ```rust
 use arbitrary::Arbitrary;
 
-// Derive `Arbitrary` so the fuzzer can automatically generate instances
-// of this struct from fuzz input.
 #[derive(Debug, Arbitrary)]
 pub struct Name {
-    data: String
+    first: String,
+    middle: Option<String>,
+    last: String,
 }
 
 impl Name {
-    pub fn check_buf(&self) {
-        let data = self.data.as_bytes();
+    pub fn check_name(&self) {
+        let data = self.first.as_bytes();
         if data.len() > 0 && data[0] == b'a' {
             if data.len() > 1 && data[1] == b'b' {
                 if data.len() > 2 && data[2] == b'c' {
@@ -181,54 +170,17 @@ impl Name {
 
 This allows the fuzzer to construct `Name` values automatically.
 
-`cargo-fuzz` supports generating `Arbitrary` values directly:
+Now `cargo-fuzz` supports generating `Arbitrary` values directly in **your harness**: 
 
 ```rust
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
-
-fn harness(data: your_project::Name) {
-    data.check_buf();
-}
 
 // Because `Name` implements `Arbitrary`, the fuzzer can generate
 // `your_project::Name` directly as input.
 fuzz_target!(|data: your_project::Name| {
-    harness(data);
+    data.check_buf();
 });
 
 ```
-
-
-**If the type does not support `Arbitrary`:**
-
-If the type does not implement `Arbitrary` and you cannot add it, you must change the harness to request simpler types (e.g., `String`, `Vec<u8>`, primitives) and manually convert them into the required type.
-
-**Alternative: using raw bytes with `Unstructured`**
-
-If you need more control over how values are extracted from the input, you can use `arbitrary::Unstructured`:
-
-```rust
-#![no_main]
-
-use libfuzzer_sys::fuzz_target;
-use arbitrary::{Arbitrary, Unstructured};
-
-fuzz_target!(|data: &[u8]| {
-    let mut u = Unstructured::new(data);
-
-    if let (Ok(name), Ok(id)) = (
-        u.arbitrary::<String>(),
-        u.arbitrary::<u32>(),
-    ) {
-        let user = your_project::User {
-            name,
-            id,
-        };
-        your_project::process(user);
-    }
-});
-```
-
-`Unstructured` treats the byte input as a stream and lets you pull multiple values from it manually. Use this only when the typed `fuzz_target!` form is not sufficient.
