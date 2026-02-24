@@ -139,7 +139,7 @@ fuzz_target!(|input: MyInputs| {
 
 ## More on `arbitrary` crate: Structure-aware fuzzing
 
-The `arbitrary` crate simplifies writing fuzzing harnesses by allowing the fuzzer to generate structured Rust values directly from input bytes. By deriving `Arbitrary`, custom structs and enums can be used as fuzzing inputs.
+The [`arbitrary` crate](https://crates.io/crates/arbitrary/1.4.2) simplifies writing fuzzing harnesses by allowing the fuzzer to generate structured Rust values directly from input bytes. By deriving `Arbitrary`, custom structs and enums can be used as fuzzing inputs.
 
 
 ### Example: deriving `Arbitrary` in your **project code**:
