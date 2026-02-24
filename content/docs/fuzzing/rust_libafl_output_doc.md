@@ -7,7 +7,7 @@ This document explains the meaning of the fields shown in the LibAFL console out
 
 ## Event Prefixes
 
-###`[UserStats #0]`
+### `[UserStats #0]`
 Lines starting with `[UserStats #0]` correspond to **UserStats events**, also called **Client Heartbeat events**.  
 These events are emitted regularly to provide a snapshot of the current fuzzing campaign state, even if no new bugs or test cases have been found.
 
@@ -54,18 +54,14 @@ Stability is defined as the percentage of coverage edges that remain consistent 
 If re-executing the same input always follows the same control-flow path, stability is 100%.
 
 If coverage varies across executions of the same input (for example due to timing effects, randomness, concurrency, or external inputs), some edges are marked as **unstable**.  
-A higher number of unstable edges makes it harder for the fuzzer to reliably detect genuinely new paths.
+Low stability forces the fuzzer to spend extra executions revalidating inputs, slows coverage growth, and can mask real findings
 
 **Source:**  
 https://aflplus.plus/docs/faq/
 
 ---
+### `edges`
+Counts the instrumented edges that have been hit at least once so far. It’s shown as covered/total, e.g. 1/100 (1%), meaning 1 control-flow transitions have been observed out of 100 possible. 
 
 ### `size_edges`
-The number of **unique coverage edges** currently discovered by the fuzzer.
-
-An *edge* represents a distinct control-flow transition observed at runtime, typically between two basic blocks or instrumentation points.  
-As fuzzing progresses, newly generated inputs that exercise previously unseen control-flow transitions increase this value.
-
-A higher `size_edges` value indicates broader exploration of the program’s control flow and greater structural code coverage of the system under test.
-
+Shows how many instrumented edges already have a “smallest input” recorded for them. Fuzzer prints it as covered/total, so 1/100 (1%) means 1 edge currently have a known minimal testcase while 100 edges exist overall. Whenever another input reaches the same edge with fewer bytes, fuzzer optionally the stored size shrinks, helping the fuzzer keep shorter reproducers. 
